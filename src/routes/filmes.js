@@ -1,4 +1,5 @@
 const express = require("express");
+const verificarToken = require("../middlewares/auth");
 
 const router = express.Router();
 
@@ -6,8 +7,10 @@ let filmes = [];
 
 let proximoId = 1;
 
+
 // POST /filmes
-router.post("/", (req, res) => {
+router.post("/", verificarToken, (req, res) => {
+
     const { titulo, diretor, ano, genero } = req.body;
 
     if (!titulo || !diretor || !ano || !genero) {
@@ -33,16 +36,19 @@ router.post("/", (req, res) => {
 
 
 // GET /filmes
-router.get("/", (req, res) => {
+router.get("/", verificarToken, (req, res) => {
     res.json(filmes);
 });
 
 
 // GET /filmes/:id
-router.get("/:id", (req, res) => {
+router.get("/:id", verificarToken, (req, res) => {
+
     const id = Number(req.params.id);
 
-    const filme = filmes.find((filme) => filme.id === id);
+    const filme = filmes.find(
+        (filme) => filme.id === id
+    );
 
     if (!filme) {
         return res.status(404).json({
@@ -55,10 +61,13 @@ router.get("/:id", (req, res) => {
 
 
 // PUT /filmes/:id
-router.put("/:id", (req, res) => {
+router.put("/:id", verificarToken, (req, res) => {
+
     const id = Number(req.params.id);
 
-    const filme = filmes.find((filme) => filme.id === id);
+    const filme = filmes.find(
+        (filme) => filme.id === id
+    );
 
     if (!filme) {
         return res.status(404).json({
@@ -84,10 +93,13 @@ router.put("/:id", (req, res) => {
 
 
 // DELETE /filmes/:id
-router.delete("/:id", (req, res) => {
+router.delete("/:id", verificarToken, (req, res) => {
+
     const id = Number(req.params.id);
 
-    const indice = filmes.findIndex((filme) => filme.id === id);
+    const indice = filmes.findIndex(
+        (filme) => filme.id === id
+    );
 
     if (indice === -1) {
         return res.status(404).json({
