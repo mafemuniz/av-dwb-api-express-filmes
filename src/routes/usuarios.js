@@ -9,7 +9,11 @@ let usuarios = [];
 let proximoId = 1;
 
 
+// ==========================================
+// CADASTRAR USUÁRIO
 // POST /usuarios
+// ==========================================
+
 router.post("/", async (req, res) => {
 
     try {
@@ -37,8 +41,8 @@ router.post("/", async (req, res) => {
 
         const novoUsuario = {
             id: proximoId,
-            nome,
-            email,
+            nome: nome,
+            email: email,
             senha: senhaCriptografada
         };
 
@@ -57,15 +61,22 @@ router.post("/", async (req, res) => {
 
     } catch (erro) {
 
+        console.error(erro);
+
         res.status(500).json({
             erro: "Erro ao cadastrar usuário."
         });
 
     }
+
 });
 
 
+// ==========================================
+// LOGIN
 // POST /usuarios/login
+// ==========================================
+
 router.post("/login", async (req, res) => {
 
     try {
@@ -89,7 +100,10 @@ router.post("/login", async (req, res) => {
         }
 
         const senhaCorreta =
-            await bcrypt.compare(senha, usuario.senha);
+            await bcrypt.compare(
+                senha,
+                usuario.senha
+            );
 
         if (!senhaCorreta) {
             return res.status(401).json({
@@ -110,16 +124,19 @@ router.post("/login", async (req, res) => {
 
         res.json({
             mensagem: "Login realizado com sucesso.",
-            token
+            token: token
         });
 
     } catch (erro) {
+
+        console.error(erro);
 
         res.status(500).json({
             erro: "Erro ao realizar login."
         });
 
     }
+
 });
 
 

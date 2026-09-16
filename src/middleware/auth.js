@@ -2,23 +2,24 @@ const jwt = require("jsonwebtoken");
 
 function verificarToken(req, res, next) {
 
-    const autorizacao = req.headers.authorization;
+    const authHeader = req.headers.authorization;
 
-    if (!autorizacao) {
+    if (!authHeader) {
         return res.status(401).json({
             erro: "Token não informado."
         });
     }
 
-    const partes = autorizacao.split(" ");
+    const partes = authHeader.split(" ");
 
-    if (partes.length !== 2 || partes[0] !== "Bearer") {
+    const tipo = partes[0];
+    const token = partes[1];
+
+    if (tipo !== "Bearer" || !token) {
         return res.status(401).json({
             erro: "Formato do token inválido."
         });
     }
-
-    const token = partes[1];
 
     try {
 
