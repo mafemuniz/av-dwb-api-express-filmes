@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 
 const usuariosRoutes = require("./routes/usuarios");
@@ -7,7 +9,7 @@ const uploadRoutes = require("./routes/upload");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./docs/swagger");
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 

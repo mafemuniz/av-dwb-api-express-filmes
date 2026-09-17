@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const router = express.Router();
 
@@ -116,13 +117,13 @@ router.post("/login", async (req, res) => {
                 id: usuario.id,
                 email: usuario.email
             },
-            "chave-secreta-av2",
+            process.env.JWT_SECRET,
             {
                 expiresIn: "1h"
             }
         );
 
-        res.json({
+        res.status(200).json({
             mensagem: "Login realizado com sucesso.",
             token: token
         });

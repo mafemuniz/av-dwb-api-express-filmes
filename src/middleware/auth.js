@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const jwt = require("jsonwebtoken");
 
 function verificarToken(req, res, next) {
@@ -25,7 +27,7 @@ function verificarToken(req, res, next) {
 
         const usuario = jwt.verify(
             token,
-            "chave-secreta-av2"
+            process.env.JWT_SECRET
         );
 
         req.usuario = usuario;
