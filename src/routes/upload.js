@@ -1,12 +1,13 @@
-const express = require("express");
-const multer = require("multer");
-const path = require("path");
+import express from "express";
+import multer from "multer";
+import path from "path";
 
-const verificarToken = require("../middleware/auth");
+import verificarToken from "../middleware/auth.js";
 
 const router = express.Router();
 
 const storage = multer.diskStorage({
+
     destination: function (req, file, cb) {
         cb(null, "src/uploads/");
     },
@@ -17,6 +18,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({
+
     storage: storage,
 
     limits: {
@@ -25,7 +27,8 @@ const upload = multer({
 
     fileFilter: function (req, file, cb) {
 
-        const extensao = path.extname(file.originalname).toLowerCase();
+        const extensao =
+            path.extname(file.originalname).toLowerCase();
 
         const extensoesPermitidas = [
             ".jpg",
@@ -36,7 +39,11 @@ const upload = multer({
         if (extensoesPermitidas.includes(extensao)) {
             cb(null, true);
         } else {
-            cb(new Error("Apenas arquivos JPG, JPEG e PNG são permitidos."));
+            cb(
+                new Error(
+                    "Apenas arquivos JPG, JPEG e PNG são permitidos."
+                )
+            );
         }
     }
 });
@@ -61,4 +68,4 @@ router.post(
     }
 );
 
-module.exports = router;
+export default router;
