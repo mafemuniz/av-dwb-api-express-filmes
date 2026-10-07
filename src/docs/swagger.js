@@ -1,4 +1,4 @@
-const swaggerJsdoc = require("swagger-jsdoc");
+import swaggerJsdoc from "swagger-jsdoc";
 
 const options = {
 
@@ -55,48 +55,83 @@ swaggerSpec.paths = {
 
     "/filmes": {
 
-        get: {
-            tags: ["Filmes"],
-            summary: "Lista todos os filmes",
-            security: [
-                {
-                    bearerAuth: []
-                }
-            ],
+    get: {
+        tags: ["Filmes"],
+        summary: "Lista todos os filmes",
+        security: [
+            {
+                bearerAuth: []
+            }
+        ],
 
-            responses: {
-                200: {
-                    description: "Lista de filmes"
-                },
-                401: {
-                    description: "Token não informado ou inválido"
+        responses: {
+            200: {
+                description: "Lista de filmes"
+            },
+            401: {
+                description: "Token não informado ou inválido"
+            }
+        }
+    },
+
+    post: {
+        tags: ["Filmes"],
+        summary: "Cadastra um novo filme",
+
+        security: [
+            {
+                bearerAuth: []
+            }
+        ],
+
+        requestBody: {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        required: [
+                            "titulo",
+                            "diretor",
+                            "ano",
+                            "genero"
+                        ],
+                        properties: {
+                            titulo: {
+                                type: "string",
+                                example: "Interestelar"
+                            },
+                            diretor: {
+                                type: "string",
+                                example: "Christopher Nolan"
+                            },
+                            ano: {
+                                type: "integer",
+                                example: 2014
+                            },
+                            genero: {
+                                type: "string",
+                                example: "Ficção Científica"
+                            }
+                        }
+                    }
                 }
             }
         },
 
-        post: {
-            tags: ["Filmes"],
-            summary: "Cadastra um novo filme",
-
-            security: [
-                {
-                    bearerAuth: []
-                }
-            ],
-
-            responses: {
-                201: {
-                    description: "Filme cadastrado"
-                },
-                400: {
-                    description: "Dados inválidos"
-                },
-                401: {
-                    description: "Não autorizado"
-                }
+        responses: {
+            201: {
+                description: "Filme cadastrado"
+            },
+            400: {
+                description: "Dados inválidos"
+            },
+            401: {
+                description: "Não autorizado"
             }
         }
-    },
+    }
+},
 
 
     "/filmes/{id}": {
@@ -198,39 +233,86 @@ swaggerSpec.paths = {
 
     "/usuarios": {
 
-        post: {
-            tags: ["Usuários"],
-            summary: "Cadastra um usuário",
+    post: {
+        tags: ["Usuários"],
+        summary: "Cadastra um usuário",
 
-            responses: {
-                201: {
-                    description: "Usuário cadastrado"
-                },
-                400: {
-                    description: "Dados obrigatórios não informados"
+        requestBody: {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        required: ["nome", "email", "senha"],
+                        properties: {
+                            nome: {
+                                type: "string",
+                                example: "Maria"
+                            },
+                            email: {
+                                type: "string",
+                                example: "maria@gmail.com"
+                            },
+                            senha: {
+                                type: "string",
+                                example: "123456"
+                            }
+                        }
+                    }
                 }
             }
+        },
+
+        responses: {
+            201: {
+                description: "Usuário cadastrado"
+            },
+            400: {
+                description: "Dados obrigatórios não informados"
+            }
         }
-    },
+    }
+},
 
 
     "/usuarios/login": {
 
-        post: {
-            tags: ["Usuários"],
-            summary: "Realiza login",
+    post: {
+        tags: ["Usuários"],
+        summary: "Realiza login",
 
-            responses: {
-                200: {
-                    description: "Login realizado e token gerado"
-                },
-                401: {
-                    description: "Email ou senha incorretos"
+        requestBody: {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        type: "object",
+                        required: ["email", "senha"],
+                        properties: {
+                            email: {
+                                type: "string",
+                                example: "maria@gmail.com"
+                            },
+                            senha: {
+                                type: "string",
+                                example: "123456"
+                            }
+                        }
+                    }
                 }
             }
-        }
-    },
+        },
 
+        responses: {
+            200: {
+                description: "Login realizado e token gerado"
+            },
+            401: {
+                description: "Email ou senha incorretos"
+            }
+        }
+    }
+},
 
     "/upload": {
 
@@ -260,4 +342,4 @@ swaggerSpec.paths = {
 };
 
 
-module.exports = swaggerSpec;
+export default swaggerSpec;

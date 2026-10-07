@@ -1,6 +1,4 @@
-require("dotenv").config();
-
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 function verificarToken(req, res, next) {
 
@@ -39,8 +37,7 @@ function verificarToken(req, res, next) {
         return res.status(401).json({
             erro: "Token inválido ou expirado."
         });
-
     }
 }
 
-module.exports = verificarToken;
+export default verificarToken;
