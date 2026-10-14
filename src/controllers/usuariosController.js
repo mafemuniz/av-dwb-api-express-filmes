@@ -94,12 +94,20 @@ export async function loginUsuario(req, res) {
             });
         }
 
+        const jwtSecret = process.env.JWT_SECRET;
+
+        if (!jwtSecret?.trim()) {
+            return res.status(500).json({
+                erro: "Erro interno de autenticação."
+            });
+        }
+
         const token = jwt.sign(
             {
                 id: usuario.id,
                 email: usuario.email
             },
-            process.env.JWT_SECRET,
+            jwtSecret,
             {
                 expiresIn: "1h"
             }

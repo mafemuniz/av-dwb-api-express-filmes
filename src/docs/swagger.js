@@ -113,6 +113,9 @@ swaggerSpec.paths = {
             },
             401: {
                 description: "Token não informado ou inválido"
+            },
+            500: {
+                description: "Erro interno ao consultar os filmes"
             }
         }
     },
@@ -147,6 +150,9 @@ swaggerSpec.paths = {
             },
             401: {
                 description: "Não autorizado"
+            },
+            500: {
+                description: "Erro interno ao cadastrar o filme"
             }
         }
     }
@@ -180,8 +186,14 @@ swaggerSpec.paths = {
                 200: {
                     description: "Filme encontrado"
                 },
+                401: {
+                    description: "Token não informado ou inválido"
+                },
                 404: {
                     description: "Filme não encontrado"
+                },
+                500: {
+                    description: "Erro interno ao consultar o filme"
                 }
             }
         },
@@ -222,8 +234,17 @@ swaggerSpec.paths = {
                 200: {
                     description: "Filme atualizado"
                 },
+                400: {
+                    description: "Dados do filme inválidos"
+                },
+                401: {
+                    description: "Token não informado ou inválido"
+                },
                 404: {
                     description: "Filme não encontrado"
+                },
+                500: {
+                    description: "Erro interno ao atualizar o filme"
                 }
             }
         },
@@ -253,8 +274,14 @@ swaggerSpec.paths = {
                 200: {
                     description: "Filme excluído"
                 },
+                401: {
+                    description: "Token não informado ou inválido"
+                },
                 404: {
                     description: "Filme não encontrado"
+                },
+                500: {
+                    description: "Erro interno ao excluir o filme"
                 }
             }
         }
@@ -284,6 +311,12 @@ swaggerSpec.paths = {
             },
             400: {
                 description: "Dados obrigatórios não informados"
+            },
+            409: {
+                description: "Este email já está cadastrado"
+            },
+            500: {
+                description: "Erro interno ao cadastrar usuário"
             }
         }
     }
@@ -311,8 +344,14 @@ swaggerSpec.paths = {
             200: {
                 description: "Login realizado e token gerado"
             },
+            400: {
+                description: "Email e senha são obrigatórios"
+            },
             401: {
                 description: "Email ou senha incorretos"
+            },
+            500: {
+                description: "Erro interno de autenticação"
             }
         }
     }

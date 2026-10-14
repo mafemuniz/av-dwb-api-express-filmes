@@ -10,14 +10,22 @@ function verificarToken(req, res, next) {
         });
     }
 
-    const partes = authHeader.split(" ");
+    const partes = authHeader.trim().split(/\s+/);
 
     const tipo = partes[0];
     const token = partes[1];
 
-    if (tipo !== "Bearer" || !token) {
+    if (tipo !== "Bearer" || !token || partes.length !== 2) {
         return res.status(401).json({
             erro: "Formato do token inválido."
+        });
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!jwtSecret?.trim()) {
+        return res.status(500).json({
+            erro: "Erro interno de autenticação."
         });
     }
 
@@ -25,7 +33,7 @@ function verificarToken(req, res, next) {
 
         const usuario = jwt.verify(
             token,
-            process.env.JWT_SECRET
+            jwtSecret
         );
 
         req.usuario = usuario;

@@ -1,4 +1,5 @@
 import express from "express";
+import { mkdirSync } from "fs";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -10,6 +11,7 @@ const uploadDirectory = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
     "../uploads"
 );
+mkdirSync(uploadDirectory, { recursive: true });
 
 const storage = multer.diskStorage({
 

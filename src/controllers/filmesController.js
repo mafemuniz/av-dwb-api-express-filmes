@@ -3,22 +3,71 @@ import {
     gerarIdFilme
 } from "../data/filmes.js";
 
+function validarDadosFilme(body) {
+    const { titulo, diretor, ano, genero } =
+        body && typeof body === "object" ? body : {};
+
+    const camposTextoValidos = [titulo, diretor, genero].every(
+        (valor) => typeof valor === "string" && valor.trim() !== ""
+    );
+
+    if (
+        !camposTextoValidos ||
+        ano === undefined ||
+        ano === null ||
+        (typeof ano === "string" && ano.trim() === "")
+    ) {
+        return {
+            erro: "Todos os campos são obrigatórios."
+        };
+    }
+
+    if (typeof ano !== "number" && typeof ano !== "string") {
+        return {
+            erro: "O ano deve ser um número inteiro válido."
+        };
+    }
+
+    const anoNumerico = Number(ano);
+
+    if (!Number.isInteger(anoNumerico)) {
+        return {
+            erro: "O ano deve ser um número inteiro válido."
+        };
+    }
+
+    return {
+        dados: {
+            titulo,
+            diretor,
+            ano: anoNumerico,
+            genero
+        }
+    };
+}
+
+function converterIdValido(idParametro) {
+    const id = Number(idParametro);
+    return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+function responderFilmeNaoEncontrado(res) {
+    return res.status(404).json({
+        erro: "Filme não encontrado."
+    });
+}
+
 export function cadastrarFilme(req, res) {
 
-    const { titulo, diretor, ano, genero } = req.body;
+    const validacao = validarDadosFilme(req.body);
 
-    if (!titulo || !diretor || !ano || !genero) {
-        return res.status(400).json({
-            erro: "Todos os campos são obrigatórios."
-        });
+    if (validacao.erro) {
+        return res.status(400).json({ erro: validacao.erro });
     }
 
     const novoFilme = {
         id: gerarIdFilme(),
-        titulo,
-        diretor,
-        ano,
-        genero
+        ...validacao.dados
     };
 
     filmes.push(novoFilme);
@@ -35,16 +84,18 @@ export function listarFilmes(req, res) {
 
 export function buscarFilmePorId(req, res) {
 
-    const id = Number(req.params.id);
+    const id = converterIdValido(req.params.id);
+
+    if (id === null) {
+        return responderFilmeNaoEncontrado(res);
+    }
 
     const filme = filmes.find(
         (filme) => filme.id === id
     );
 
     if (!filme) {
-        return res.status(404).json({
-            erro: "Filme não encontrado."
-        });
+        return responderFilmeNaoEncontrado(res);
     }
 
     res.json(filme);
@@ -53,30 +104,27 @@ export function buscarFilmePorId(req, res) {
 
 export function atualizarFilme(req, res) {
 
-    const id = Number(req.params.id);
+    const id = converterIdValido(req.params.id);
+
+    if (id === null) {
+        return responderFilmeNaoEncontrado(res);
+    }
 
     const filme = filmes.find(
         (filme) => filme.id === id
     );
 
     if (!filme) {
-        return res.status(404).json({
-            erro: "Filme não encontrado."
-        });
+        return responderFilmeNaoEncontrado(res);
     }
 
-    const { titulo, diretor, ano, genero } = req.body;
+    const validacao = validarDadosFilme(req.body);
 
-    if (!titulo || !diretor || !ano || !genero) {
-        return res.status(400).json({
-            erro: "Todos os campos são obrigatórios."
-        });
+    if (validacao.erro) {
+        return res.status(400).json({ erro: validacao.erro });
     }
 
-    filme.titulo = titulo;
-    filme.diretor = diretor;
-    filme.ano = ano;
-    filme.genero = genero;
+    Object.assign(filme, validacao.dados);
 
     res.json(filme);
 }
@@ -84,16 +132,18 @@ export function atualizarFilme(req, res) {
 
 export function excluirFilme(req, res) {
 
-    const id = Number(req.params.id);
+    const id = converterIdValido(req.params.id);
+
+    if (id === null) {
+        return responderFilmeNaoEncontrado(res);
+    }
 
     const indice = filmes.findIndex(
         (filme) => filme.id === id
     );
 
     if (indice === -1) {
-        return res.status(404).json({
-            erro: "Filme não encontrado."
-        });
+        return responderFilmeNaoEncontrado(res);
     }
 
     const filmeRemovido = filmes.splice(indice, 1);
