@@ -1,4 +1,5 @@
 import express from "express";
+import { randomUUID } from "crypto";
 import { mkdirSync } from "fs";
 import multer from "multer";
 import path from "path";
@@ -20,7 +21,8 @@ const storage = multer.diskStorage({
     },
 
     filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + path.basename(file.originalname));
+        const extensao = path.extname(file.originalname).toLowerCase();
+        cb(null, `${Date.now()}-${randomUUID()}${extensao}`);
     }
 });
 
@@ -67,9 +69,11 @@ function tratarErroUpload(req, res, next) {
         const mensagem = erro instanceof multer.MulterError &&
             erro.code === "LIMIT_FILE_SIZE"
             ? "O arquivo excede o limite de 2 MB."
-            : erroDoCliente
-                ? erro.message
-                : "Erro ao processar o upload.";
+            : erro.status === 400
+                ? "Apenas arquivos JPG, JPEG e PNG são permitidos."
+                : erroDoCliente
+                    ? "O arquivo enviado é inválido."
+                    : "Erro ao processar o upload.";
 
         return res.status(status).json({ erro: mensagem });
     });

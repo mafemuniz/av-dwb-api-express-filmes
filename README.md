@@ -65,9 +65,48 @@ src/uploads/              Arquivos enviados (novos uploads são ignorados pelo G
 | `DELETE` | `/filmes/:id` | JWT | Exclui filme |
 | `POST` | `/upload` | JWT | Envia imagem no campo `imagem` |
 
+## Exemplos de requisições
+
+Os exemplos abaixo usam `curl` em um terminal Bash. Cadastre um usuário e obtenha um token de acesso:
+
+```bash
+curl -X POST http://localhost:3000/usuarios \
+    -H "Content-Type: application/json" \
+    -d '{"nome":"Maria","email":"maria@example.com","senha":"uma-senha"}'
+
+curl -X POST http://localhost:3000/usuarios/login \
+    -H "Content-Type: application/json" \
+    -d '{"email":"maria@example.com","senha":"uma-senha"}'
+```
+
+Copie o `token` retornado pelo login e defina-o na variável de ambiente `TOKEN`. Use-o nas operações protegidas:
+
+```bash
+export TOKEN="<token-retornado-pelo-login>"
+
+# Cadastrar filme
+curl -X POST http://localhost:3000/filmes \
+    -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+    -d '{"titulo":"Interestelar","diretor":"Christopher Nolan","ano":2014,"genero":"Ficção Científica"}'
+
+# Listar filmes e consultar pelo ID
+curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/filmes
+curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/filmes/1
+
+# Atualizar e excluir pelo ID
+curl -X PUT http://localhost:3000/filmes/1 \
+    -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+    -d '{"titulo":"Interestelar","diretor":"Christopher Nolan","ano":"2014","genero":"Ficção Científica"}'
+curl -X DELETE -H "Authorization: Bearer $TOKEN" http://localhost:3000/filmes/1
+
+# Enviar uma imagem local JPG, JPEG ou PNG (máximo 2 MB)
+curl -X POST http://localhost:3000/upload \
+    -H "Authorization: Bearer $TOKEN" -F "imagem=@./poster.jpg"
+```
+
 O cadastro de filmes recebe JSON com `titulo`, `diretor`, `ano` e `genero`. A atualização substitui esses mesmos campos. O upload aceita JPG, JPEG ou PNG com tamanho máximo de 2 MB; os arquivos são armazenados em `src/uploads/`.
 
-A validação do upload verifica a extensão informada no nome do arquivo; ela não inspeciona o conteúdo binário nem garante, sozinha, que o arquivo seja seguro.
+A validação do upload verifica a extensão informada no nome do arquivo; ela não inspeciona o conteúdo binário nem garante, sozinha, que o arquivo seja seguro. Como melhoria de segurança, pode-se validar a assinatura binária (magic bytes) com uma biblioteca de detecção de tipo antes de armazenar o arquivo.
 
 ## Autenticação
 

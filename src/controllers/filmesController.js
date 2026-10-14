@@ -28,9 +28,15 @@ function validarDadosFilme(body) {
         };
     }
 
+    if (typeof ano === "string" && !/^[+-]?\d+$/.test(ano.trim())) {
+        return {
+            erro: "O ano deve ser um número inteiro válido."
+        };
+    }
+
     const anoNumerico = Number(ano);
 
-    if (!Number.isInteger(anoNumerico)) {
+    if (!Number.isSafeInteger(anoNumerico)) {
         return {
             erro: "O ano deve ser um número inteiro válido."
         };
@@ -47,8 +53,12 @@ function validarDadosFilme(body) {
 }
 
 function converterIdValido(idParametro) {
+    if (!/^\d+$/.test(idParametro)) {
+        return null;
+    }
+
     const id = Number(idParametro);
-    return Number.isInteger(id) && id > 0 ? id : null;
+    return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
 function responderFilmeNaoEncontrado(res) {

@@ -6,17 +6,41 @@ import {
     gerarIdUsuario
 } from "../data/usuarios.js";
 
+function obterDadosUsuario(body, exigirNome = true) {
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+        return null;
+    }
+
+    const { nome, email, senha } = body;
+
+    if (
+        (exigirNome && (typeof nome !== "string" || nome.trim() === "")) ||
+        typeof email !== "string" || email.trim() === "" ||
+        typeof senha !== "string" || senha.trim() === ""
+    ) {
+        return null;
+    }
+
+    return {
+        nome: typeof nome === "string" ? nome.trim() : undefined,
+        email: email.trim().toLowerCase(),
+        senha
+    };
+}
+
 export async function cadastrarUsuario(req, res) {
 
     try {
 
-        const { nome, email, senha } = req.body;
+        const dadosUsuario = obterDadosUsuario(req.body);
 
-        if (!nome || !email || !senha) {
+        if (!dadosUsuario) {
             return res.status(400).json({
                 erro: "Nome, email e senha são obrigatórios."
             });
         }
+
+        const { nome, email, senha } = dadosUsuario;
 
         const usuarioExistente = usuarios.find(
             (usuario) => usuario.email === email
@@ -64,13 +88,15 @@ export async function loginUsuario(req, res) {
 
     try {
 
-        const { email, senha } = req.body;
+        const dadosUsuario = obterDadosUsuario(req.body, false);
 
-        if (!email || !senha) {
+        if (!dadosUsuario) {
             return res.status(400).json({
                 erro: "Email e senha são obrigatórios."
             });
         }
+
+        const { email, senha } = dadosUsuario;
 
         const usuario = usuarios.find(
             (usuario) => usuario.email === email
