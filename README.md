@@ -9,11 +9,19 @@ Projeto desenvolvido para a AV1 da disciplina de Desenvolvimento de Websites. Es
 
 ## Instalação e execução
 
-Instale as dependências e crie um arquivo `.env` a partir de `.env.example`. Configure uma chave JWT própria e não compartilhe nem versione o arquivo `.env`.
+Instale as dependências:
 
 ```bash
 npm install
 ```
+
+No PowerShell, crie `.env` a partir do exemplo (em outros terminais, use o comando de cópia equivalente):
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Substitua `JWT_SECRET` por um valor aleatório mantido apenas no ambiente local. O arquivo de exemplo contém placeholders, não credenciais de produção.
 
 Exemplo de configuração local:
 
@@ -30,6 +38,19 @@ npm run dev
 ```
 
 A API ficará disponível em `http://localhost:3000` (ou na porta definida em `PORT`). A interface Swagger está em `http://localhost:3000/api-docs`.
+
+## Estrutura do projeto
+
+```text
+server.js                 Inicializa o servidor
+src/app.js                Configura o Express, middlewares e rotas
+src/controllers/          Lógica de usuários e filmes
+src/data/                 Arrays compartilhados e geradores de IDs
+src/routes/               Rotas de usuários, filmes e upload
+src/middleware/auth.js    Autenticação JWT
+src/docs/swagger.js       Especificação OpenAPI
+src/uploads/              Arquivos enviados (novos uploads são ignorados pelo Git)
+```
 
 ## Rotas
 
@@ -51,6 +72,8 @@ A validação do upload verifica a extensão informada no nome do arquivo; ela n
 ## Autenticação
 
 Cadastre um usuário em `POST /usuarios` e envie as credenciais a `POST /usuarios/login`. As senhas são armazenadas com hash bcrypt e não são incluídas nas respostas. O login retorna um JWT válido por uma hora.
+
+O cadastro recebe JSON no formato `{"nome":"Maria","email":"maria@example.com","senha":"uma-senha"}`. Em seguida, envie `{"email":"maria@example.com","senha":"uma-senha"}` ao login e copie o campo `token` da resposta para as requisições protegidas.
 
 Nas rotas protegidas, envie o token no cabeçalho:
 
