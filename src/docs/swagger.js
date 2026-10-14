@@ -6,7 +6,7 @@ const options = {
         openapi: "3.0.0",
 
         info: {
-            title: "API Catálogo de Filmes",
+            title: "API de Catálogo de Filmes",
             version: "1.0.0",
             description: "API REST de catálogo de filmes desenvolvida para a AV2."
         },
@@ -38,6 +38,49 @@ const options = {
                     type: "http",
                     scheme: "bearer",
                     bearerFormat: "JWT"
+                }
+            },
+            schemas: {
+                UsuarioCadastro: {
+                    type: "object",
+                    required: ["nome", "email", "senha"],
+                    properties: {
+                        nome: { type: "string", example: "Maria" },
+                        email: {
+                            type: "string",
+                            format: "email",
+                            example: "maria@gmail.com"
+                        },
+                        senha: { type: "string", example: "senha123" }
+                    }
+                },
+                UsuarioLogin: {
+                    type: "object",
+                    required: ["email", "senha"],
+                    properties: {
+                        email: {
+                            type: "string",
+                            format: "email",
+                            example: "maria@gmail.com"
+                        },
+                        senha: { type: "string", example: "senha123" }
+                    }
+                },
+                Filme: {
+                    type: "object",
+                    required: ["titulo", "diretor", "ano", "genero"],
+                    properties: {
+                        titulo: { type: "string", example: "Interestelar" },
+                        diretor: {
+                            type: "string",
+                            example: "Christopher Nolan"
+                        },
+                        ano: { type: "integer", example: 2014 },
+                        genero: {
+                            type: "string",
+                            example: "Ficção Científica"
+                        }
+                    }
                 }
             }
         }
@@ -89,31 +132,7 @@ swaggerSpec.paths = {
             content: {
                 "application/json": {
                     schema: {
-                        type: "object",
-                        required: [
-                            "titulo",
-                            "diretor",
-                            "ano",
-                            "genero"
-                        ],
-                        properties: {
-                            titulo: {
-                                type: "string",
-                                example: "Interestelar"
-                            },
-                            diretor: {
-                                type: "string",
-                                example: "Christopher Nolan"
-                            },
-                            ano: {
-                                type: "integer",
-                                example: 2014
-                            },
-                            genero: {
-                                type: "string",
-                                example: "Ficção Científica"
-                            }
-                        }
+                        $ref: "#/components/schemas/Filme"
                     }
                 }
             }
@@ -188,6 +207,17 @@ swaggerSpec.paths = {
                 }
             ],
 
+            requestBody: {
+                required: true,
+                content: {
+                    "application/json": {
+                        schema: {
+                            $ref: "#/components/schemas/Filme"
+                        }
+                    }
+                }
+            },
+
             responses: {
                 200: {
                     description: "Filme atualizado"
@@ -242,22 +272,7 @@ swaggerSpec.paths = {
             content: {
                 "application/json": {
                     schema: {
-                        type: "object",
-                        required: ["nome", "email", "senha"],
-                        properties: {
-                            nome: {
-                                type: "string",
-                                example: "Maria"
-                            },
-                            email: {
-                                type: "string",
-                                example: "maria@gmail.com"
-                            },
-                            senha: {
-                                type: "string",
-                                example: "123456"
-                            }
-                        }
+                        $ref: "#/components/schemas/UsuarioCadastro"
                     }
                 }
             }
@@ -286,18 +301,7 @@ swaggerSpec.paths = {
             content: {
                 "application/json": {
                     schema: {
-                        type: "object",
-                        required: ["email", "senha"],
-                        properties: {
-                            email: {
-                                type: "string",
-                                example: "maria@gmail.com"
-                            },
-                            senha: {
-                                type: "string",
-                                example: "123456"
-                            }
-                        }
+                        $ref: "#/components/schemas/UsuarioLogin"
                     }
                 }
             }
@@ -326,6 +330,26 @@ swaggerSpec.paths = {
                 }
             ],
 
+            requestBody: {
+                required: true,
+                content: {
+                    "multipart/form-data": {
+                        schema: {
+                            type: "object",
+                            required: ["imagem"],
+                            properties: {
+                                imagem: {
+                                    type: "string",
+                                    format: "binary",
+                                    description: "Arquivo JPG, JPEG ou PNG de até 2 MB",
+                                    example: "poster.jpg"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+
             responses: {
                 201: {
                     description: "Imagem enviada"
@@ -335,6 +359,9 @@ swaggerSpec.paths = {
                 },
                 401: {
                     description: "Não autorizado"
+                },
+                500: {
+                    description: "Erro ao processar o upload"
                 }
             }
         }
