@@ -67,6 +67,12 @@ function responderFilmeNaoEncontrado(res) {
     });
 }
 
+function responderIdInvalido(res) {
+    return res.status(400).json({
+        erro: "O ID do filme deve ser um inteiro positivo."
+    });
+}
+
 export function cadastrarFilme(req, res) {
 
     const validacao = validarDadosFilme(req.body);
@@ -97,7 +103,7 @@ export function buscarFilmePorId(req, res) {
     const id = converterIdValido(req.params.id);
 
     if (id === null) {
-        return responderFilmeNaoEncontrado(res);
+        return responderIdInvalido(res);
     }
 
     const filme = filmes.find(
@@ -117,7 +123,7 @@ export function atualizarFilme(req, res) {
     const id = converterIdValido(req.params.id);
 
     if (id === null) {
-        return responderFilmeNaoEncontrado(res);
+        return responderIdInvalido(res);
     }
 
     const filme = filmes.find(
@@ -145,7 +151,7 @@ export function excluirFilme(req, res) {
     const id = converterIdValido(req.params.id);
 
     if (id === null) {
-        return responderFilmeNaoEncontrado(res);
+        return responderIdInvalido(res);
     }
 
     const indice = filmes.findIndex(

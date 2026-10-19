@@ -48,14 +48,18 @@ src/controllers/          Lógica de usuários e filmes
 src/data/                 Arrays compartilhados e geradores de IDs
 src/routes/               Rotas de usuários, filmes e upload
 src/middleware/auth.js    Autenticação JWT
-src/docs/swagger.js       Especificação OpenAPI
+src/config/swagger.js     Especificação OpenAPI
 src/uploads/              Arquivos enviados (novos uploads são ignorados pelo Git)
 ```
+
+O `src/app.js` também configura o acesso estático aos arquivos em `/uploads`, uma resposta JSON para rotas inexistentes e o tratamento global de erros.
 
 ## Rotas
 
 | Método | Caminho | Acesso | Descrição |
 | --- | --- | --- | --- |
+| `GET` | `/` | Público | Verifica se a API está funcionando |
+| `GET` | `/api-docs` | Público | Interface da documentação Swagger |
 | `POST` | `/usuarios` | Público | Cadastra usuário com `nome`, `email` e `senha` |
 | `POST` | `/usuarios/login` | Público | Valida credenciais e retorna JWT |
 | `POST` | `/filmes` | JWT | Cadastra filme |
@@ -64,6 +68,9 @@ src/uploads/              Arquivos enviados (novos uploads são ignorados pelo G
 | `PUT` | `/filmes/:id` | JWT | Atualiza filme |
 | `DELETE` | `/filmes/:id` | JWT | Exclui filme |
 | `POST` | `/upload` | JWT | Envia imagem no campo `imagem` |
+| `GET` | `/uploads/:filename` | Público | Acessa uma imagem enviada |
+
+Nos endpoints de filme, um ID que não seja inteiro positivo retorna `400`; um ID válido sem filme correspondente retorna `404`.
 
 ## Exemplos de requisições
 
@@ -104,7 +111,7 @@ curl -X POST http://localhost:3000/upload \
     -H "Authorization: Bearer $TOKEN" -F "imagem=@./poster.jpg"
 ```
 
-O cadastro de filmes recebe JSON com `titulo`, `diretor`, `ano` e `genero`. A atualização substitui esses mesmos campos. O upload aceita JPG, JPEG ou PNG com tamanho máximo de 2 MB; os arquivos são armazenados em `src/uploads/`.
+O cadastro de filmes recebe JSON com `titulo`, `diretor`, `ano` e `genero`. A atualização substitui esses mesmos campos. O upload aceita JPG, JPEG ou PNG com tamanho máximo de 2 MB; os arquivos são armazenados em `src/uploads/` e podem ser acessados em `/uploads/<nome-do-arquivo>`.
 
 A validação do upload verifica a extensão informada no nome do arquivo; ela não inspeciona o conteúdo binário nem garante, sozinha, que o arquivo seja seguro. Como melhoria de segurança, pode-se validar a assinatura binária (magic bytes) com uma biblioteca de detecção de tipo antes de armazenar o arquivo.
 
