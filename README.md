@@ -1,94 +1,68 @@
-# API Catálogo de Filmes
+# API de Catálogo de Filmes
 
-Projeto desenvolvido para a AV1 da disciplina de Desenvolvimento de Websites.
+API REST em Node.js e Express para cadastro de usuários, autenticação e gerenciamento de filmes. Os filmes são persistidos em MySQL por meio do Prisma ORM.
 
-## Sobre o projeto
+## Requisitos
 
-Esta aplicação é uma API REST desenvolvida com Node.js e Express para simular um catálogo de filmes.
+- Node.js e npm
+- MySQL ou MariaDB
+- Um cliente HTTP, como Insomnia, Postman ou `curl`
 
-Os dados são armazenados temporariamente em memória utilizando uma lista de objetos JavaScript.
+## Instalação e configuração
 
-## Tecnologias utilizadas
+Instale as dependências e copie o exemplo de variáveis de ambiente:
 
-* Node.js
-* Express
-* JavaScript
-* Insomnia
-* GitHub
+```powershell
+npm install
+Copy-Item .env.example .env
+```
 
-## Funcionalidades
+No arquivo `.env`, configure um segredo JWT local e `DATABASE_URL` com as credenciais do seu MySQL/MariaDB. Por exemplo:
 
-A API permite:
+```env
+PORT=3000
+JWT_SECRET=defina_uma_chave_longa_e_aleatoria
+DATABASE_URL="mysql://USUARIO:SENHA@localhost:3306/NOME_DO_BANCO"
+```
 
-* cadastrar filmes;
-* listar filmes;
-* consultar filme por ID;
-* editar filmes;
-* excluir filmes.
+Crie/aplique a migration e gere o Prisma Client:
+
+```bash
+npx prisma migrate dev --name criar_filmes
+npx prisma generate
+```
+
+Inicie a API com `npm start` ou `npm run dev`. Ela ficará disponível em `http://localhost:3000`, com a documentação em `http://localhost:3000/api-docs`.
 
 ## Rotas
 
-### Cadastrar filme
+| Método | Caminho | Acesso | Descrição |
+| --- | --- | --- | --- |
+| `GET` | `/` | Público | Verifica se a API está funcionando |
+| `GET` | `/api-docs` | Público | Documentação Swagger |
+| `POST` | `/usuarios` | Público | Cadastra usuário |
+| `POST` | `/usuarios/login` | Público | Autentica usuário e retorna JWT |
+| `POST` | `/filmes` | JWT | Cadastra filme |
+| `GET` | `/filmes` | JWT | Lista filmes |
+| `GET` | `/filmes/:id` | JWT | Consulta filme por ID |
+| `PUT` | `/filmes/:id` | JWT | Atualiza um ou mais campos do filme |
+| `DELETE` | `/filmes/:id` | JWT | Exclui filme |
+| `POST` | `/upload` | JWT | Envia imagem no campo `imagem` |
+| `GET` | `/uploads/:filename` | Público | Acessa uma imagem enviada |
 
-```text
-POST /filmes
-```
+O cadastro exige `titulo`, `diretor`, `ano` e `genero`. A atualização aceita um ou mais desses campos. Um ID inválido retorna `400`; um ID inexistente retorna `404`.
 
-### Listar filmes
-
-```text
-GET /filmes
-```
-
-### Consultar filme por ID
-
-```text
-GET /filmes/:id
-```
-
-### Editar filme
-
-```text
-PUT /filmes/:id
-```
-
-### Excluir filme
-
-```text
-DELETE /filmes/:id
-```
-
-## Como executar
-
-Primeiro, instale as dependências:
-
-```bash
-npm install
-```
-
-Depois execute:
-
-```bash
-npm start
-```
-
-O servidor será iniciado em:
-
-```text
-http://localhost:3000
-```
-
-## Exemplo de cadastro
+## Exemplo de filme
 
 ```json
 {
-    "titulo": "Interestelar",
-    "diretor": "Christopher Nolan",
-    "ano": 2014,
-    "genero": "Ficção Científica"
+  "titulo": "Interestelar",
+  "diretor": "Christopher Nolan",
+  "ano": 2014,
+  "genero": "Ficção Científica"
 }
 ```
 
-## Observação
+Cadastre um usuário em `/usuarios`, faça login em `/usuarios/login` e envie o JWT retornado no cabeçalho `Authorization: Bearer <token>` às rotas protegidas. As senhas são armazenadas com hash bcrypt e o token JWT expira em uma hora.
 
-Os dados são armazenados apenas enquanto o servidor estiver em execução. Ao desligar o servidor, os dados são perdidos.
+O upload aceita JPG, JPEG ou PNG de até 2 MB. Os arquivos ficam em `src/uploads/`; a validação atual considera a extensão do arquivo, não sua assinatura binária.
