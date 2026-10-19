@@ -1,143 +1,68 @@
 # API de Catálogo de Filmes
 
-Projeto desenvolvido para a AV1 da disciplina de Desenvolvimento de Websites. Esta API REST usa Node.js e Express para cadastrar usuários, autenticar operações protegidas e gerenciar um catálogo de filmes.
+API REST em Node.js e Express para cadastro de usuários, autenticação e gerenciamento de filmes. Os filmes são persistidos em MySQL por meio do Prisma ORM.
 
 ## Requisitos
 
 - Node.js e npm
+- MySQL ou MariaDB
 - Um cliente HTTP, como Insomnia, Postman ou `curl`
 
-## Instalação e execução
+## Instalação e configuração
 
-Instale as dependências:
-
-```bash
-npm install
-```
-
-No PowerShell, crie `.env` a partir do exemplo (em outros terminais, use o comando de cópia equivalente):
+Instale as dependências e copie o exemplo de variáveis de ambiente:
 
 ```powershell
+npm install
 Copy-Item .env.example .env
 ```
 
-Substitua `JWT_SECRET` por um valor aleatório mantido apenas no ambiente local. O arquivo de exemplo contém placeholders, não credenciais de produção.
-
-Exemplo de configuração local:
+No arquivo `.env`, configure um segredo JWT local e `DATABASE_URL` com as credenciais do seu MySQL/MariaDB. Por exemplo:
 
 ```env
 PORT=3000
 JWT_SECRET=defina_uma_chave_longa_e_aleatoria
+DATABASE_URL="mysql://USUARIO:SENHA@localhost:3306/NOME_DO_BANCO"
 ```
 
-Inicie o servidor normalmente ou em modo de desenvolvimento com reinicialização automática:
+Crie/aplique a migration e gere o Prisma Client:
 
 ```bash
-npm start
-npm run dev
+npx prisma migrate dev --name criar_filmes
+npx prisma generate
 ```
 
-A API ficará disponível em `http://localhost:3000` (ou na porta definida em `PORT`). A interface Swagger está em `http://localhost:3000/api-docs`.
-
-## Estrutura do projeto
-
-```text
-server.js                 Inicializa o servidor
-src/app.js                Configura o Express, middlewares e rotas
-src/controllers/          Lógica de usuários e filmes
-src/data/                 Arrays compartilhados e geradores de IDs
-src/routes/               Rotas de usuários, filmes e upload
-src/middleware/auth.js    Autenticação JWT
-src/config/swagger.js     Especificação OpenAPI
-src/uploads/              Arquivos enviados (novos uploads são ignorados pelo Git)
-```
-
-O `src/app.js` também configura o acesso estático aos arquivos em `/uploads`, uma resposta JSON para rotas inexistentes e o tratamento global de erros.
+Inicie a API com `npm start` ou `npm run dev`. Ela ficará disponível em `http://localhost:3000`, com a documentação em `http://localhost:3000/api-docs`.
 
 ## Rotas
 
 | Método | Caminho | Acesso | Descrição |
 | --- | --- | --- | --- |
 | `GET` | `/` | Público | Verifica se a API está funcionando |
-| `GET` | `/api-docs` | Público | Interface da documentação Swagger |
-| `POST` | `/usuarios` | Público | Cadastra usuário com `nome`, `email` e `senha` |
-| `POST` | `/usuarios/login` | Público | Valida credenciais e retorna JWT |
+| `GET` | `/api-docs` | Público | Documentação Swagger |
+| `POST` | `/usuarios` | Público | Cadastra usuário |
+| `POST` | `/usuarios/login` | Público | Autentica usuário e retorna JWT |
 | `POST` | `/filmes` | JWT | Cadastra filme |
 | `GET` | `/filmes` | JWT | Lista filmes |
 | `GET` | `/filmes/:id` | JWT | Consulta filme por ID |
-| `PUT` | `/filmes/:id` | JWT | Atualiza filme |
+| `PUT` | `/filmes/:id` | JWT | Atualiza um ou mais campos do filme |
 | `DELETE` | `/filmes/:id` | JWT | Exclui filme |
 | `POST` | `/upload` | JWT | Envia imagem no campo `imagem` |
 | `GET` | `/uploads/:filename` | Público | Acessa uma imagem enviada |
 
-Nos endpoints de filme, um ID que não seja inteiro positivo retorna `400`; um ID válido sem filme correspondente retorna `404`.
-
-## Exemplos de requisições
-
-Os exemplos abaixo usam `curl` em um terminal Bash. Cadastre um usuário e obtenha um token de acesso:
-
-```bash
-curl -X POST http://localhost:3000/usuarios \
-    -H "Content-Type: application/json" \
-    -d '{"nome":"Maria","email":"maria@example.com","senha":"uma-senha"}'
-
-curl -X POST http://localhost:3000/usuarios/login \
-    -H "Content-Type: application/json" \
-    -d '{"email":"maria@example.com","senha":"uma-senha"}'
-```
-
-Copie o `token` retornado pelo login e defina-o na variável de ambiente `TOKEN`. Use-o nas operações protegidas:
-
-```bash
-export TOKEN="<token-retornado-pelo-login>"
-
-# Cadastrar filme
-curl -X POST http://localhost:3000/filmes \
-    -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-    -d '{"titulo":"Interestelar","diretor":"Christopher Nolan","ano":2014,"genero":"Ficção Científica"}'
-
-# Listar filmes e consultar pelo ID
-curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/filmes
-curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/filmes/1
-
-# Atualizar e excluir pelo ID
-curl -X PUT http://localhost:3000/filmes/1 \
-    -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-    -d '{"titulo":"Interestelar","diretor":"Christopher Nolan","ano":"2014","genero":"Ficção Científica"}'
-curl -X DELETE -H "Authorization: Bearer $TOKEN" http://localhost:3000/filmes/1
-
-# Enviar uma imagem local JPG, JPEG ou PNG (máximo 2 MB)
-curl -X POST http://localhost:3000/upload \
-    -H "Authorization: Bearer $TOKEN" -F "imagem=@./poster.jpg"
-```
-
-O cadastro de filmes recebe JSON com `titulo`, `diretor`, `ano` e `genero`. A atualização substitui esses mesmos campos. O upload aceita JPG, JPEG ou PNG com tamanho máximo de 2 MB; os arquivos são armazenados em `src/uploads/` e podem ser acessados em `/uploads/<nome-do-arquivo>`.
-
-A validação do upload verifica a extensão informada no nome do arquivo; ela não inspeciona o conteúdo binário nem garante, sozinha, que o arquivo seja seguro. Como melhoria de segurança, pode-se validar a assinatura binária (magic bytes) com uma biblioteca de detecção de tipo antes de armazenar o arquivo.
-
-## Autenticação
-
-Cadastre um usuário em `POST /usuarios` e envie as credenciais a `POST /usuarios/login`. As senhas são armazenadas com hash bcrypt e não são incluídas nas respostas. O login retorna um JWT válido por uma hora.
-
-O cadastro recebe JSON no formato `{"nome":"Maria","email":"maria@example.com","senha":"uma-senha"}`. Em seguida, envie `{"email":"maria@example.com","senha":"uma-senha"}` ao login e copie o campo `token` da resposta para as requisições protegidas.
-
-Nas rotas protegidas, envie o token no cabeçalho:
-
-```text
-Authorization: Bearer <token>
-```
+O cadastro exige `titulo`, `diretor`, `ano` e `genero`. A atualização aceita um ou mais desses campos. Um ID inválido retorna `400`; um ID inexistente retorna `404`.
 
 ## Exemplo de filme
 
 ```json
 {
-    "titulo": "Interestelar",
-    "diretor": "Christopher Nolan",
-    "ano": 2014,
-    "genero": "Ficção Científica"
+  "titulo": "Interestelar",
+  "diretor": "Christopher Nolan",
+  "ano": 2014,
+  "genero": "Ficção Científica"
 }
 ```
 
-## Armazenamento
+Cadastre um usuário em `/usuarios`, faça login em `/usuarios/login` e envie o JWT retornado no cabeçalho `Authorization: Bearer <token>` às rotas protegidas. As senhas são armazenadas com hash bcrypt e o token JWT expira em uma hora.
 
-Usuários e filmes ficam em arrays em memória, sem banco de dados. Esses registros desaparecem quando o servidor reinicia. Os arquivos enviados são gravados no diretório `src/uploads/`.
+O upload aceita JPG, JPEG ou PNG de até 2 MB. Os arquivos ficam em `src/uploads/`; a validação atual considera a extensão do arquivo, não sua assinatura binária.
