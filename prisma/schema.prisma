@@ -1,21 +1,29 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// 1. Configuração do seu banco (geralmente já vem pronta)
+datasource db {
+  provider = "mysql" 
+}
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
-datasource db {
-  provider = "mysql"
+// 2. Criando a tabela de Usuários
+model User {
+  id        String   @id @default(uuid()) // Chave primária que gera um ID único automático
+  email     String   @unique              // Campo de texto que não pode se repetir
+  name      String?                       // A interrogação (?) indica que o campo é opcional
+  createdAt DateTime @default(now())     // Salva a data e hora de criação automaticamente
+  posts     Post[]                        // Relação: Um usuário pode ter vários posts (Lista)
 }
 
-model Filme {
-  id      Int    @id @default(autoincrement())
-  titulo  String @db.VarChar(100)
-  diretor String @db.VarChar(100)
-  ano     Int
-  genero  String @db.VarChar(50)
-
-  @@map("filmes")
+// 3. Criando a tabela de Posts (Relacionada ao Usuário)
+model Post {
+  id        Int      @id @default(autoincrement()) // ID numérico que aumenta sozinho (1, 2, 3...)
+  title     String
+  content   String?
+  published Boolean  @default(false)             // Valor padrão se não for enviado nada
+  authorId  String                                 // Guarda o ID do usuário dono deste post
+  
+  // Define a relação física no banco de dados:
+  author    User     @relation(fields: [authorId], references: [id])
 }
